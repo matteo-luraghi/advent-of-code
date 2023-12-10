@@ -30,7 +30,7 @@ func strongestHand(a string, b string) int {
 }
 
 func points(table map[string]int, hands []string, startRank int, startRes int) (int, int) {
-	println("RES PRE:", startRes, "RANK PRE", startRank)
+	println("RES PRE:", startRes, "RANK PRE:", startRank)
 	rank := startRank
 	res := startRes
 	for _, hand := range hands {
@@ -38,7 +38,20 @@ func points(table map[string]int, hands []string, startRank int, startRes int) (
 		rank--
 	}
 	println("RES:", res, "RANK:", rank)
-	return res, rank
+	return rank, res
+}
+
+func isTwoPair(points []int) bool {
+	slices.Sort(points)
+	twoPair := []int{1, 2, 2}
+	i := 0
+	for i < 3 {
+		if points[i] != twoPair[i] {
+			return false
+		}
+		i++
+	}
+	return true
 }
 
 func printHands(hands []string) {
@@ -59,6 +72,7 @@ func main() {
 	var fourOfKind []string
 	var fullHouse []string
 	var threeOfKind []string
+	var twoPair []string
 	var pair []string
 	var high []string
 
@@ -77,23 +91,30 @@ func main() {
 				points = append(points, count)
 			}
 		}
-
+		//full house case
 		if slices.Contains(points, 3) && slices.Contains(points, 2) {
 			fullHouse = append(fullHouse, hand)
 		} else {
-			value := slices.Max(points)
+			//two pair case
+			if isTwoPair(points) {
+				twoPair = append(twoPair, hand)
+			} else {
+				//other cases
+				value := slices.Max(points)
 
-			switch value {
-			case 5:
-				fiveOfKind = append(fiveOfKind, hand)
-			case 4:
-				fourOfKind = append(fourOfKind, hand)
-			case 3:
-				threeOfKind = append(threeOfKind, hand)
-			case 2:
-				pair = append(pair, hand)
-			default:
-				high = append(high, hand)
+				switch value {
+				case 5:
+					fiveOfKind = append(fiveOfKind, hand)
+				case 4:
+					fourOfKind = append(fourOfKind, hand)
+				case 3:
+					threeOfKind = append(threeOfKind, hand)
+				case 2:
+					pair = append(pair, hand)
+				default:
+					high = append(high, hand)
+
+				}
 			}
 		}
 
@@ -101,6 +122,7 @@ func main() {
 		if err != nil {
 			println(err)
 		}
+
 		table[hand] = bid
 	}
 
@@ -108,6 +130,7 @@ func main() {
 	slices.SortFunc(fourOfKind, strongestHand)
 	slices.SortFunc(fullHouse, strongestHand)
 	slices.SortFunc(threeOfKind, strongestHand)
+	slices.SortFunc(twoPair, strongestHand)
 	slices.SortFunc(pair, strongestHand)
 	slices.SortFunc(high, strongestHand)
 
@@ -119,17 +142,20 @@ func main() {
 	printHands(fullHouse)
 	println("THREE:", len(threeOfKind))
 	printHands(threeOfKind)
+	println("TWO PAIR:", len(twoPair))
+	printHands(twoPair)
 	println("PAIR:", len(pair))
 	printHands(pair)
 	println("HIGH:", len(high))
 	printHands(high)
 
-	res, rank := points(table, fiveOfKind, len(table), 0)
-	res, rank = points(table, fourOfKind, rank, res)
-	res, rank = points(table, fullHouse, rank, res)
-	res, rank = points(table, threeOfKind, rank, res)
-	res, rank = points(table, pair, rank, res)
-	res, rank = points(table, high, rank, res)
+	rank, res := points(table, fiveOfKind, len(table), 0)
+	rank, res = points(table, fourOfKind, rank, res)
+	rank, res = points(table, fullHouse, rank, res)
+	rank, res = points(table, threeOfKind, rank, res)
+	rank, res = points(table, twoPair, rank, res)
+	rank, res = points(table, pair, rank, res)
+	rank, res = points(table, high, rank, res)
 
 	println("LEN TABLE:", len(table))
 	println("RES:", res)
