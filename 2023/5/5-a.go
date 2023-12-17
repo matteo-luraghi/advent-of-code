@@ -10,9 +10,12 @@ import (
 )
 
 func update(array []int64, scanner *bufio.Scanner) []int64 {
+	tmp := make([]int64, len(array))
+	copy(tmp, array)
+
 	var used []int64
 	for scanner.Scan() {
-		var i int64 = 0
+
 		text := scanner.Text()
 		if text == "" {
 			break
@@ -28,18 +31,31 @@ func update(array []int64, scanner *bufio.Scanner) []int64 {
 				nums = append(nums, int64(num))
 			}
 		}
+
 		dist := nums[2]
-		for i < dist {
-			data := nums[1] + i
-			if slices.Contains(array, data) {
-				idx := slices.Index(array, data)
-				array = append(array[:idx], array[idx+1:]...) //delete the element at the index idx
-				used = append(used, int64(nums[0]+i))
+		for _, el := range array {
+			scarto := el - nums[1]
+			if scarto >= 0 && scarto < dist {
+				idx := slices.Index(tmp, el)
+				tmp = append(tmp[:idx], tmp[idx+1:]...) //delete the element at the index idx
+				used = append(used, int64(nums[0]+scarto))
 			}
-			i++
 		}
+
+		// SLOW IMPLEMENTATION
+		// var i int64 = 0
+		// for i < dist {
+		// 	data := nums[1] + i
+		// 	if slices.Contains(array, data) {
+		// 		idx := slices.Index(array, data)
+		// 		array = append(array[:idx], array[idx+1:]...) //delete the element at the index idx
+		// 		used = append(used, int64(nums[0]+i))
+		// 	}
+		// 	i++
+		// }
+
 	}
-	for _, el := range array {
+	for _, el := range tmp {
 		used = append(used, el)
 	}
 	return used
