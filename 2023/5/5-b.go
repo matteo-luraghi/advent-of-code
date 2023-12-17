@@ -10,9 +10,9 @@ import (
 )
 
 func update(array []int64, scanner *bufio.Scanner) []int64 {
+	var tmp []int64
 	var used []int64
 	for scanner.Scan() {
-		var i int64 = 0
 		text := scanner.Text()
 		if text == "" {
 			break
@@ -29,18 +29,19 @@ func update(array []int64, scanner *bufio.Scanner) []int64 {
 			}
 		}
 		dist := nums[2]
-		for i < dist {
-			data := nums[1] + i
-			if slices.Contains(array, data) {
-				idx := slices.Index(array, data)
-				array = append(array[:idx], array[idx+1:]...) //delete the element at the index idx
-				used = append(used, int64(nums[0]+i))
+		for _, el := range array {
+			scarto := el - nums[1]
+			if scarto >= 0 && scarto < dist {
+				tmp = append(tmp, el)
+				used = append(used, int64(nums[0]+scarto))
 			}
-			i++
 		}
+
 	}
 	for _, el := range array {
-		used = append(used, el)
+		if !slices.Contains(tmp, el) {
+			used = append(used, el)
+		}
 	}
 	return used
 }
